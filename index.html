@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Santri - Pondok Pesantren MDIA Bontoala Makassar</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d5c3e">
+  <style>
+    :root { --primary: #0d5c3e; --primary-dark: #083d29; --accent: #d4af37; --bg: #f4f7f5; --card: #ffffff; --text: #1f2937; --border: #d1d5db; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin: 0; background-color: var(--bg); color: var(--text); }
+    header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 1.5rem 1rem; text-align: center; border-bottom: 4px solid var(--accent); }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header p { margin: 0.3rem 0 0; font-size: 0.9rem; opacity: 0.9; }
+    .container { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .tab-btn { flex: 1; padding: 0.8rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #e5e7eb; color: var(--text); }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .card { background: var(--card); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+    h2 { color: var(--primary); font-size: 1.15rem; margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+    h3 { color: var(--primary-dark); font-size: 1rem; margin: 1.2rem 0 0.8rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #374151; }
+    input, select, textarea { padding: 0.65rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; width: 100%; }
+    .btn-group { display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .btn { padding: 0.75rem 1.4rem; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: #6b7280; color: white; }
+    .btn-export { background: #1d4ed8; color: white; }
+    .btn-danger { background: #dc2626; color: white; padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    .btn-edit { background: #d97706; color: white; padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    .btn-detail { background: var(--primary); color: white; padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 220px; }
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background-color: #f9fafb; color: var(--primary-dark); font-weight: 700; }
+    .hidden { display: none !important; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 1000; }
+    .modal-content { background: white; border-radius: 10px; max-width: 650px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 1.5rem; }
+    .detail-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed #e5e7eb; gap: 1rem; font-size: 0.9rem; }
+    .detail-label { font-weight: 600; color: #4b5563; min-width: 180px; }
+    .detail-val { text-align: right; color: #111827; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Pondok Pesantren MDIA Bontoala Makassar</h1>
+  <p>Jl. Lamuru No. 65 Makassar — Sistem Database Santri</p>
+</header>
+<div class="container">
+  <div class="tabs">
+    <button type="button" class="tab-btn active" id="tabDataBtn">Daftar Santri (<span id="totalCount">0</span>)</button>
+    <button type="button" class="tab-btn" id="tabFormBtn">+ Tambah / Edit Data</button>
+  </div>
+  <div id="viewData" class="card">
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-box" placeholder="Cari nama santri, kelas, atau nama orang tua...">
+      <button type="button" class="btn btn-export" id="exportBtn">Unduh Excel (CSV)</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>No</th><th>Nama Lengkap Santri</th><th>Diterima di Kelas</th><th>Tempat Tinggal</th><th>Nama Bapak / Ibu</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="santriTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="viewForm" class="card hidden">
+    <h2 id="formTitle">Formulir Input Data Santri Baru</h2>
+    <form id="santriForm">
+      <input type="hidden" id="editId">
+      <h3>A. Identitas Santri</h3>
+      <div class="grid">
+        <div class="form-group"><label>Nama Lengkap Santri *</label><input type="text" id="namaSantri" required></div>
+        <div class="form-group"><label>Tempat & Tanggal Lahir Santri *</label><input type="text" id="ttlSantri" placeholder="Contoh: Makassar, 12 Mei 2012" required></div>
+        <div class="form-group"><label>Diterima di Kelas *</label><input type="text" id="diterimaKelas" placeholder="Contoh: VII MTs / X MA" required></div>
+        <div class="form-group"><label>Anak ke-</label><input type="number" id="anakKe" min="1" placeholder="Contoh: 2"></div>
+        <div class="form-group"><label>Agama</label><input type="text" id="agama" value="Islam"></div>
+        <div class="form-group">
+          <label>Tinggal Bersama *</label>
+          <select id="tinggalBersama" required>
+            <option value="">-- Pilih Tempat Tinggal --</option>
+            <option value="Orang Tua">Orang Tua</option>
+            <option value="Wali">Wali</option>
+            <option value="Asrama">Asrama</option>
+            <option value="Kost">Kost</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Alamat Santri *</label><textarea id="alamatSantri" rows="2" required></textarea></div>
+      </div>
+      <h3>B. Identitas Orang Tua & Wali</h3>
+      <div class="grid">
+        <div class="form-group"><label>Nama Bapak *</label><input type="text" id="namaBapak" required></div>
+        <div class="form-group"><label>Tempat & Tanggal Lahir Bapak</label><input type="text" id="ttlBapak" placeholder="Contoh: Gowa, 10 Agustus 1980"></div>
+        <div class="form-group"><label>Pekerjaan Bapak</label><input type="text" id="pekerjaanBapak"></div>
+        <div class="form-group"><label>Penghasilan Bapak per Bulan (Rp)</label><input type="text" id="penghasilanBapak" placeholder="Contoh: 3.500.000"></div>
+        <div class="form-group"><label>Nama Ibu *</label><input type="text" id="namaIbu" required></div>
+        <div class="form-group"><label>Tempat & Tanggal Lahir Ibu</label><input type="text" id="ttlIbu" placeholder="Contoh: Makassar, 15 Maret 1983"></div>
+        <div class="form-group"><label>Pekerjaan Ibu</label><input type="text" id="pekerjaanIbu"></div>
+        <div class="form-group"><label>Penghasilan Ibu per Bulan (Rp)</label><input type="text" id="penghasilanIbu" placeholder="Contoh: 2.000.000 atau -"></div>
+        <div class="form-group"><label>Pekerjaan Wali (Jika ada)</label><input type="text" id="pekerjaanWali"></div>
+        <div class="form-group"><label>Penghasilan Wali per Bulan (Rp)</label><input type="text" id="penghasilanWali" placeholder="Isi jika tinggal bersama wali"></div>
+        <div class="form-group full"><label>Alamat Orang Tua / Wali *</label><textarea id="alamatOrtuWali" rows="2" required></textarea></div>
+      </div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">Simpan Data Santri</button>
+        <button type="button" class="btn btn-secondary" id="resetBtn">Batal / Reset</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="detailModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Detail Lengkap Biodata Santri</h2>
+    <div id="detailBody"></div>
+    <div class="btn-group"><button type="button" class="btn btn-secondary" id="closeModalBtn">Tutup</button></div>
+  </div>
+</div>
+<script>
+  const STORAGE_KEY = 'db_santri_mdia_bontoala';
+  let dataSantri = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  function switchTab(tab) {
+    document.getElementById('viewData').classList.toggle('hidden', tab !== 'data');
+    document.getElementById('viewForm').classList.toggle('hidden', tab !== 'form');
+    document.getElementById('tabDataBtn').classList.toggle('active', tab === 'data');
+    document.getElementById('tabFormBtn').classList.toggle('active', tab === 'form');
+  }
+  document.getElementById('tabDataBtn').addEventListener('click', () => switchTab('data'));
+  document.getElementById('tabFormBtn').addEventListener('click', () => switchTab('form'));
+  document.getElementById('searchInput').addEventListener('keyup', renderTable);
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
+  document.getElementById('resetBtn').addEventListener('click', resetForm);
+  document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
+  document.getElementById('santriForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const editId = document.getElementById('editId').value;
+    const item = {
+      id: editId ? Number(editId) : Date.now(),
+      namaSantri: document.getElementById('namaSantri').value.trim(),
+      ttlSantri: document.getElementById('ttlSantri').value.trim(),
+      alamatSantri: document.getElementById('alamatSantri').value.trim(),
