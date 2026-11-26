@@ -1,0 +1,10 @@
+ ```json
+   {
+     "name": "Database Santri MDIA Bontoala",
+     "short_name": "Santri MDIA",
+     "start_url": "./index.html",
+     "display": "standalone",
+     "background_color": "#f4f7f5",
+     "theme_color": "#0d5c3e",
+     "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2997/2997322.png", "sizes": "512x512", "type": "image/png" }]
+   }
