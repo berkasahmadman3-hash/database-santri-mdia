@@ -54,13 +54,13 @@
 </header>
 <div class="container">
   <div class="tabs">
-    <button type="button" class="tab-btn active" id="tabDataBtn">Daftar Santri (<span id="totalCount">0</span>)</button>
-    <button type="button" class="tab-btn" id="tabFormBtn">+ Tambah / Edit Data</button>
+    <button type="button" class="tab-btn active" id="tabDataBtn" onclick="bukaTab('data')">Daftar Santri (<span id="totalCount">0</span>)</button>
+    <button type="button" class="tab-btn" id="tabFormBtn" onclick="bukaTab('form')">+ Tambah / Edit Data</button>
   </div>
   <div id="viewData" class="card">
     <div class="toolbar">
-      <input type="text" id="searchInput" class="search-box" placeholder="Cari nama santri, kelas, atau nama orang tua...">
-      <button type="button" class="btn btn-export" id="exportBtn">Unduh Excel (CSV)</button>
+      <input type="text" id="searchInput" class="search-box" placeholder="Cari nama santri, kelas, atau nama orang tua..." onkeyup="renderTable()">
+      <button type="button" class="btn btn-export" onclick="exportCSV()">Unduh Excel (CSV)</button>
     </div>
     <div class="table-responsive">
       <table>
@@ -73,7 +73,7 @@
   </div>
   <div id="viewForm" class="card hidden">
     <h2 id="formTitle">Formulir Input Data Santri Baru</h2>
-    <form id="santriForm">
+    <form id="santriForm" onsubmit="simpanData(event)">
       <input type="hidden" id="editId">
       <h3>A. Identitas Santri</h3>
       <div class="grid">
@@ -110,7 +110,7 @@
       </div>
       <div class="btn-group">
         <button type="submit" class="btn btn-primary">Simpan Data Santri</button>
-        <button type="button" class="btn btn-secondary" id="resetBtn">Batal / Reset</button>
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">Batal / Reset</button>
       </div>
     </form>
   </div>
@@ -119,29 +119,29 @@
   <div class="modal-content">
     <h2>Detail Lengkap Biodata Santri</h2>
     <div id="detailBody"></div>
-    <div class="btn-group"><button type="button" class="btn btn-secondary" id="closeModalBtn">Tutup</button></div>
+    <div class="btn-group"><button type="button" class="btn btn-secondary" onclick="document.getElementById('detailModal').classList.add('hidden')">Tutup</button></div>
   </div>
 </div>
 <script>
-  const STORAGE_KEY = 'db_santri_mdia_bontoala';
-  let dataSantri = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  function switchTab(tab) {
+  var STORAGE_KEY = 'db_santri_mdia_bontoala';
+  var dataSantri = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  function bukaTab(tab) {
     document.getElementById('viewData').classList.toggle('hidden', tab !== 'data');
     document.getElementById('viewForm').classList.toggle('hidden', tab !== 'form');
     document.getElementById('tabDataBtn').classList.toggle('active', tab === 'data');
     document.getElementById('tabFormBtn').classList.toggle('active', tab === 'form');
   }
-  document.getElementById('tabDataBtn').addEventListener('click', () => switchTab('data'));
-  document.getElementById('tabFormBtn').addEventListener('click', () => switchTab('form'));
-  document.getElementById('searchInput').addEventListener('keyup', renderTable);
-  document.getElementById('exportBtn').addEventListener('click', exportCSV);
-  document.getElementById('resetBtn').addEventListener('click', resetForm);
-  document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
-  document.getElementById('santriForm').addEventListener('submit', function(e) {
+  function simpanData(e) {
     e.preventDefault();
-    const editId = document.getElementById('editId').value;
-    const item = {
+    var editId = document.getElementById('editId').value;
+    var item = {
       id: editId ? Number(editId) : Date.now(),
       namaSantri: document.getElementById('namaSantri').value.trim(),
       ttlSantri: document.getElementById('ttlSantri').value.trim(),
       alamatSantri: document.getElementById('alamatSantri').value.trim(),
+      diterimaKelas: document.getElementById('diterimaKelas').value.trim(),
+      anakKe: document.getElementById('anakKe').value.trim(),
+      agama: document.getElementById('agama').value.trim(),
+      tinggalBersama: document.getElementById('tinggalBersama').value,
+      namaBapak: document.getElementById('namaBapak').value.trim(),
+      ttlBapak: document.getElementById('ttlBapak').value.trim(),
